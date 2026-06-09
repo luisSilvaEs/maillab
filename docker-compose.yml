@@ -1,0 +1,7 @@
+# docker-compose.yml
+# Services will be added progressively as each phase is implemented.
+# Phase 1: postgres, openldap, backend, frontend
+# Phase 2: + mailpit
+# Phase 3: + postfix, dovecot (replaces mailpit)
+
+services: {}
