@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: maillab
+
+  # ── Database ────────────────────────────────────────────────────────────────
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  # ── LDAP ─────────────────────────────────────────────────────────────────────
+  ldap:
+    urls: ${SPRING_LDAP_URLS}
+    base: ${SPRING_LDAP_BASE}
+    username: ${SPRING_LDAP_USERNAME}
+    password: ${SPRING_LDAP_PASSWORD}
+
+  # ── Mail (Mailpit in dev) ────────────────────────────────────────────────────
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+# ── Actuator ──────────────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# ── App custom properties ──────────────────────────────────────────────────────
+app:
+  domain: ${APP_DOMAIN}
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS}
