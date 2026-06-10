@@ -1,0 +1,30 @@
+# ou=users
+dn: ou=users,dc=luissilvacoding,dc=com
+objectClass: organizationalUnit
+ou: users
+
+# ou=groups
+dn: ou=groups,dc=luissilvacoding,dc=com
+objectClass: organizationalUnit
+ou: groups
+
+# maillab-users group
+dn: cn=maillab-users,ou=groups,dc=luissilvacoding,dc=com
+objectClass: groupOfNames
+cn: maillab-users
+member: cn=admin,dc=luissilvacoding,dc=com
+
+# ── Demo user (dev only) ─────────────────────────────────────
+# Password is SSHA hash of "changeme"
+# Regenerate with: slappasswd -s yourpassword
+dn: uid=demo,ou=users,dc=luissilvacoding,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: demo
+cn: Demo User
+sn: User
+givenName: Demo
+mail: demo@luissilvacoding.com
+userPassword: {SSHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g+ArNo
