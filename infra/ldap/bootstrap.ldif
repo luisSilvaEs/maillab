@@ -10,11 +10,11 @@ ou: groups
 
 # maillab-users group
 dn: cn=maillab-users,ou=groups,dc=luissilvacoding,dc=com
-objectClass: groupOfNames
+objectClass: groupOfUniqueNames
 cn: maillab-users
-member: cn=admin,dc=luissilvacoding,dc=com
+uniqueMember: uid=demo,ou=users,dc=luissilvacoding,dc=com
 
-# ── Demo user (dev only) ─────────────────────────────────────
+# Demo user (dev only)
 # Password is SSHA hash of "changeme"
 # Regenerate with: slappasswd -s yourpassword
 dn: uid=demo,ou=users,dc=luissilvacoding,dc=com
