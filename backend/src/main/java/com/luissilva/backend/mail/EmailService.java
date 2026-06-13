@@ -23,17 +23,21 @@ public class EmailService {
     }
 
     public void send(String to, String subject, String body) {
+        send("noreply@luissilvacoding.com", to, subject, body);
+    }
+
+    public void send(String from, String to, String subject, String body) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
 
-            helper.setFrom("noreply@luissilvacoding.com");
+            helper.setFrom(from);
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(body);
 
             mailSender.send(message);
-            log.info("Email sent to {}: {}", to, subject);
+            log.info("Email sent from {} to {}: {}", from, to, subject);
 
         } catch (MessagingException e) {
             log.error("Failed to send email to {}: {}", to, e.getMessage());
