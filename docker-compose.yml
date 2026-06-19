@@ -59,6 +59,23 @@ services:
       - openldap
     networks:
       - maillab-network
+  # ── Dovecop ───────────────────────────────────────────────────────────────────
+  dovecot:
+    build:
+      context: ./infra/dovecot
+      dockerfile: Dockerfile
+    container_name: maillab-dovecot
+    environment:
+      - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
+    ports:
+      - "143:143"
+    volumes:
+      - dovecot-mail:/var/mail/vhosts
+      - postfix-spool:/var/spool/postfix/private
+    networks:
+      - maillab-network
+    depends_on:
+      - openldap
 
   # ── Postfix ───────────────────────────────────────────────────────────────────
   postfix:
@@ -130,6 +147,8 @@ volumes:
   postgres_data:
   ldap_data:
   ldap_config:
+  dovecot-mail:
+  postfix-spool:
 
 # ── Networks ──────────────────────────────────────────────────────────────────
 networks:
