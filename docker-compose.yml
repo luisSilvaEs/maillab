@@ -59,7 +59,7 @@ services:
       - openldap
     networks:
       - maillab-network
-  # ── Dovecop ───────────────────────────────────────────────────────────────────
+  # ── Dovecot ───────────────────────────────────────────────────────────────────
   dovecot:
     build:
       context: ./infra/dovecot
@@ -87,6 +87,8 @@ services:
       - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
     ports:
       - "25:25"
+    volumes:
+      - postfix-spool:/var/spool/postfix/private
     networks:
       - maillab-network
     depends_on:
@@ -108,8 +110,6 @@ services:
       SPRING_LDAP_BASE: ${SPRING_LDAP_BASE}
       SPRING_LDAP_USERNAME: ${SPRING_LDAP_USERNAME}
       SPRING_LDAP_PASSWORD: ${SPRING_LDAP_PASSWORD}
-      MAIL_HOST: mailpit
-      MAIL_PORT: 1025
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
       APP_DOMAIN: ${APP_DOMAIN}
@@ -121,7 +121,7 @@ services:
         condition: service_healthy
       openldap:
         condition: service_started
-      mailpit:
+      postfix:
         condition: service_started
     networks:
       - maillab-network
