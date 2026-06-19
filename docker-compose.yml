@@ -60,16 +60,20 @@ services:
     networks:
       - maillab-network
 
-  # ── Mailpit ───────────────────────────────────────────────────────────────────
-  mailpit:
-    image: axllent/mailpit:latest
-    container_name: maillab-mailpit
-    restart: unless-stopped
+  # ── Postfix ───────────────────────────────────────────────────────────────────
+  postfix:
+    build:
+      context: ./infra/postfix
+      dockerfile: Dockerfile
+    container_name: maillab-postfix
+    environment:
+      - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
     ports:
-      - "1025:1025"   # SMTP
-      - "8025:8025"   # Web UI
+      - "25:25"
     networks:
       - maillab-network
+    depends_on:
+      - openldap
 
   # ── Backend (Spring Boot) ────────────────────────────────────────────────────
   backend:
