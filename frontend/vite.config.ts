@@ -11,7 +11,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        // In Docker, use the backend service name as the host.
+        // When running outside Docker (e.g. bare npm run dev), change this to http://localhost:8080.
+        target: 'http://maillab-backend:8080',
         changeOrigin: true,
       },
     },
