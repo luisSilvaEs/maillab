@@ -28,15 +28,25 @@ public class JwtService {
 
     // ── Token generation ──────────────────────────────────────────────────────
 
-    public String generateToken(String username) {
+    public String generateToken(String username, String password) {
         long now = System.currentTimeMillis();
 
         return Jwts.builder()
                 .subject(username)
+                .claim("pwd", password)
                 .issuedAt(new Date(now))
                 .expiration(new Date(now + expirationMs))
                 .signWith(signingKey)
                 .compact();
+    }
+
+    // Keep existing method as fallback (used by verifyTwoFactor for now)
+    public String generateToken(String username) {
+        return generateToken(username, "");
+    }
+
+    public String extractPassword(String token) {
+        return extractClaim(token, claims -> claims.get("pwd", String.class));
     }
 
     // ── Token validation ──────────────────────────────────────────────────────

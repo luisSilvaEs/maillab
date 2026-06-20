@@ -51,3 +51,7 @@ app:
   jwt:
     secret: ${JWT_SECRET}
     expiration-ms: ${JWT_EXPIRATION_MS}
+
+imap:
+  host: ${IMAP_HOST:dovecot}
+  port: ${IMAP_PORT:143}

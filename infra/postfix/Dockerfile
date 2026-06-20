@@ -1,21 +1,13 @@
 # infra/postfix/Dockerfile
 
-FROM debian:bookworm-slim
+FROM boky/postfix:latest
 
-RUN apt-get update && apt-get install -y \
-    postfix \
-    postfix-ldap \
-    libsasl2-modules \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy config files
+# Copy our config files
 COPY main.cf /etc/postfix/main.cf
 COPY master.cf /etc/postfix/master.cf
 COPY ldap-accounts.cf /etc/postfix/ldap-accounts.cf
+COPY entrypoint-ldap.sh /docker-init.d/entrypoint-ldap.sh
 
-# Postfix requires these directories
-RUN mkdir -p /var/spool/postfix/private
+RUN chmod +x /docker-init.d/entrypoint-ldap.sh
 
 EXPOSE 25
-
-CMD ["postfix", "start-fg"]

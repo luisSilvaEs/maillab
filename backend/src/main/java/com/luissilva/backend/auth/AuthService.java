@@ -74,7 +74,7 @@ public class AuthService {
                 request.username() + "@luissilvacoding.com",
                 request.username());
 
-        String token = jwtService.generateToken(request.username());
+        String token = jwtService.generateToken(request.username(), request.password());
         return AuthResponse.withToken(token);
     }
 
@@ -90,7 +90,7 @@ public class AuthService {
             return AuthResponse.twoFactorRequired();
         }
 
-        String token = jwtService.generateToken(request.username());
+        String token = jwtService.generateToken(request.username(), request.password());
         return AuthResponse.withToken(token);
     }
 
