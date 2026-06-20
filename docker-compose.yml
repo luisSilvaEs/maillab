@@ -59,17 +59,42 @@ services:
       - openldap
     networks:
       - maillab-network
-
-  # ── Mailpit ───────────────────────────────────────────────────────────────────
-  mailpit:
-    image: axllent/mailpit:latest
-    container_name: maillab-mailpit
-    restart: unless-stopped
+  # ── Dovecot ───────────────────────────────────────────────────────────────────
+  dovecot:
+    build:
+      context: ./infra/dovecot
+      dockerfile: Dockerfile
+    container_name: maillab-dovecot
+    environment:
+      - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
     ports:
-      - "1025:1025"   # SMTP
-      - "8025:8025"   # Web UI
+      - "143:143"
+    volumes:
+      - dovecot-mail:/var/mail/vhosts
+      - postfix-spool:/var/spool/postfix/private
     networks:
       - maillab-network
+    depends_on:
+      - openldap
+
+  # ── Postfix ───────────────────────────────────────────────────────────────────
+  postfix:
+    build:
+      context: ./infra/postfix
+      dockerfile: Dockerfile
+    container_name: maillab-postfix
+    environment:
+      - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
+      - ALLOWED_SENDER_DOMAINS=luissilvacoding.com
+      - POSTFIX_myhostname=mail.luissilvacoding.com
+    ports:
+      - "25:25"
+    volumes:
+      - postfix-spool:/var/spool/postfix/private
+    networks:
+      - maillab-network
+    depends_on:
+      - openldap
 
   # ── Backend (Spring Boot) ────────────────────────────────────────────────────
   backend:
@@ -87,8 +112,6 @@ services:
       SPRING_LDAP_BASE: ${SPRING_LDAP_BASE}
       SPRING_LDAP_USERNAME: ${SPRING_LDAP_USERNAME}
       SPRING_LDAP_PASSWORD: ${SPRING_LDAP_PASSWORD}
-      MAIL_HOST: mailpit
-      MAIL_PORT: 1025
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
       APP_DOMAIN: ${APP_DOMAIN}
@@ -100,7 +123,7 @@ services:
         condition: service_healthy
       openldap:
         condition: service_started
-      mailpit:
+      postfix:
         condition: service_started
     networks:
       - maillab-network
@@ -126,6 +149,8 @@ volumes:
   postgres_data:
   ldap_data:
   ldap_config:
+  dovecot-mail:
+  postfix-spool:
 
 # ── Networks ──────────────────────────────────────────────────────────────────
 networks:

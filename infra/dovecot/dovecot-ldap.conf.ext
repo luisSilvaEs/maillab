@@ -1,0 +1,15 @@
+# infra/dovecot/dovecot-ldap.conf.ext
+
+hosts = openldap:389
+dn = cn=admin,dc=luissilvacoding,dc=com
+dnpass = ${LDAP_ADMIN_PASSWORD}
+tls = no
+
+auth_bind = yes
+base = ou=users,dc=luissilvacoding,dc=com
+user_filter = (&(objectClass=inetOrgPerson)(uid=%n))
+pass_filter = (&(objectClass=inetOrgPerson)(uid=%n))
+
+# Tell Dovecot which system user owns the mailbox files
+user_attrs = uid=user, =uid=vmail, =gid=vmail, =home=/var/mail/vhosts/%n
+pass_attrs = userPassword=password

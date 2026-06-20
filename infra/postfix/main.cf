@@ -1,0 +1,40 @@
+# infra/postfix/main.cf
+
+# ---------------------------------------------------------------
+# Identity
+# ---------------------------------------------------------------
+myhostname = mail.luissilvacoding.com
+mydomain = luissilvacoding.com
+myorigin = $mydomain
+
+# ---------------------------------------------------------------
+# Network
+# ---------------------------------------------------------------
+# Listen on all interfaces inside the Docker network
+inet_interfaces = all
+inet_protocols = ipv4
+
+# Only accept mail from the backend container (no open relay)
+mynetworks = 127.0.0.1/32, 172.16.0.0/12, 10.0.0.0/8
+
+# ---------------------------------------------------------------
+# Local delivery — hand off to Dovecot via LMTP
+# ---------------------------------------------------------------
+# We are NOT a final destination for system users (root, etc.)
+mydestination =
+
+virtual_transport = lmtp:unix:/var/spool/postfix/private/dovecot-lmtp
+
+# ---------------------------------------------------------------
+# Virtual mailbox domain
+# ---------------------------------------------------------------
+virtual_mailbox_domains = luissilvacoding.com
+
+# Validate recipients against LDAP before accepting the message
+virtual_mailbox_maps = ldap:/etc/postfix/ldap-accounts.cf
+
+# ---------------------------------------------------------------
+# Disable features we don't need
+# ---------------------------------------------------------------
+smtpd_use_tls = no
+smtp_use_tls = no
