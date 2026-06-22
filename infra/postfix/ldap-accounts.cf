@@ -1,0 +1,11 @@
+# infra/postfix/ldap-accounts.cf
+
+server_host = ldap://openldap:389
+search_base = ou=users,dc=luissilvacoding,dc=com
+query_filter = (&(objectClass=inetOrgPerson)(uid=%s))
+result_attribute = uid
+
+# Bind credentials for Postfix to query LDAP
+bind = yes
+bind_dn = cn=admin,dc=luissilvacoding,dc=com
+bind_pw = ${LDAP_ADMIN_PASSWORD}

@@ -4,11 +4,13 @@ import com.luissilva.backend.auth.dto.AuthResponse;
 import com.luissilva.backend.auth.dto.LoginRequest;
 import com.luissilva.backend.auth.dto.RegisterRequest;
 import com.luissilva.backend.auth.dto.Verify2faRequest;
+import com.luissilva.backend.mail.EmailService;
 import com.luissilva.backend.security.JwtService;
 import com.luissilva.backend.totp.QrCodeService;
 import com.luissilva.backend.totp.TotpService;
 import com.luissilva.backend.user.User;
 import com.luissilva.backend.user.UserRepository;
+import com.luissilva.backend.mail.EmailService;
 import com.google.zxing.WriterException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ldap.core.LdapTemplate;
@@ -31,6 +33,7 @@ public class AuthService {
     private final LdapTemplate ldapTemplate;
     private final LdapContextSource ldapContextSource;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Value("${app.domain}")
     private String appDomain;
@@ -42,7 +45,8 @@ public class AuthService {
             QrCodeService qrCodeService,
             LdapTemplate ldapTemplate,
             LdapContextSource ldapContextSource,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            EmailService emailService) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.totpService = totpService;
@@ -50,6 +54,7 @@ public class AuthService {
         this.ldapTemplate = ldapTemplate;
         this.ldapContextSource = ldapContextSource;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     // ── Register ──────────────────────────────────────────────────────────────
@@ -65,7 +70,11 @@ public class AuthService {
         createLdapEntry(request);
         createPostgresRow(request);
 
-        String token = jwtService.generateToken(request.username());
+        emailService.sendWelcome(
+                request.username() + "@luissilvacoding.com",
+                request.username());
+
+        String token = jwtService.generateToken(request.username(), request.password());
         return AuthResponse.withToken(token);
     }
 
@@ -81,7 +90,7 @@ public class AuthService {
             return AuthResponse.twoFactorRequired();
         }
 
-        String token = jwtService.generateToken(request.username());
+        String token = jwtService.generateToken(request.username(), request.password());
         return AuthResponse.withToken(token);
     }
 
@@ -99,7 +108,7 @@ public class AuthService {
             throw new BadCredentialsException("Invalid 2FA code");
         }
 
-        String token = jwtService.generateToken(request.username());
+        String token = jwtService.generateToken(request.username(), user.getPassword());
         return AuthResponse.withToken(token);
     }
 
@@ -159,6 +168,7 @@ public class AuthService {
         User user = new User();
         user.setUsername(request.username());
         user.setEmail(request.email());
+        user.setPassword(request.password());
         userRepository.save(user);
     }
 }

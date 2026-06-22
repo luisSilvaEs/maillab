@@ -27,15 +27,14 @@ spring:
 
   # ── Mail (Mailpit in dev) ────────────────────────────────────────────────────
   mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
+    host: ${MAIL_HOST:mailpit}
+    port: ${MAIL_PORT:1025}
     properties:
       mail:
         smtp:
           auth: false
           starttls:
             enable: false
-
 # ── Actuator ──────────────────────────────────────────────────────────────────
 management:
   endpoints:
@@ -52,3 +51,7 @@ app:
   jwt:
     secret: ${JWT_SECRET}
     expiration-ms: ${JWT_EXPIRATION_MS}
+
+imap:
+  host: ${IMAP_HOST:dovecot}
+  port: ${IMAP_PORT:143}
