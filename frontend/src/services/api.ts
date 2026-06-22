@@ -11,6 +11,24 @@ export interface AuthResponse {
   message?: string;
 }
 
+export interface MailMessageDto {
+  uid: number;
+  from: string;
+  subject: string;
+  sentAt: string;
+  seen: boolean;
+}
+
+export interface MailMessageDetailDto {
+  uid: number;
+  from: string;
+  to: string;
+  subject: string;
+  body: string;
+  sentAt: string;
+  seen: boolean;
+}
+
 // ─── Request shapes ───────────────────────────────────────────────────────────
 
 interface LoginRequest {
@@ -27,6 +45,12 @@ interface RegisterRequest {
 interface Verify2faRequest {
   username: string;
   code: number; // Integer on the backend — always parse before sending
+}
+
+export interface SendMailRequest {
+  to: string;
+  subject: string;
+  body: string;
 }
 
 // ─── Internal helper ──────────────────────────────────────────────────────────
@@ -56,7 +80,11 @@ async function request<T>(
     throw new Error(body?.message ?? `Request failed: ${response.status}`);
   }
 
-  return response.json() as Promise<T>;
+  // 204 No Content — nothing to parse
+  if (response.status === 204) return undefined as T;
+
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 // ─── Auth endpoints ───────────────────────────────────────────────────────────
@@ -86,5 +114,24 @@ export const authApi = {
   // Requires a valid JWT — used after login to enable 2FA
   setupTwoFactor(): Promise<AuthResponse> {
     return request<AuthResponse>("/auth/setup-2fa", { method: "POST" }, true);
+  },
+};
+
+// ─── Mail endpoints ───────────────────────────────────────────────────────────
+
+export const mailApi = {
+  getInbox(): Promise<MailMessageDto[]> {
+    return request<MailMessageDto[]>("/mail/inbox", {}, true);
+  },
+
+  getMessage(uid: number): Promise<MailMessageDetailDto> {
+    return request<MailMessageDetailDto>(`/mail/${uid}`, {}, true);
+  },
+
+  send(data: SendMailRequest): Promise<void> {
+    return request<void>("/mail/send", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }, true);
   },
 };

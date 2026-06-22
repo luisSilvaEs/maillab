@@ -1,9 +1,12 @@
 package com.luissilva.backend.mail;
 
 import com.luissilva.backend.mail.dto.SendMailRequest;
+
+import jakarta.mail.SendFailedException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailSendException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,10 +29,26 @@ public class MailController {
     private final MailService mailService;
     private final ImapService imapService;
 
+    private String extractSmtpMessage(MailSendException e) {
+        if (e.getFailedMessages() != null && !e.getFailedMessages().isEmpty()) {
+            Exception cause = e.getFailedMessages().values().iterator().next();
+            if (cause instanceof SendFailedException sfe && sfe.getCause() != null) {
+                return sfe.getCause().getMessage();
+            }
+            return cause.getMessage();
+        }
+        return "Failed to send message";
+    }
+
     @PostMapping("/send")
-    public ResponseEntity<Void> send(@Valid @RequestBody SendMailRequest request) {
-        mailService.send(request.getTo(), request.getSubject(), request.getBody());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> send(@Valid @RequestBody SendMailRequest request) {
+        try {
+            mailService.send(request.getTo(), request.getSubject(), request.getBody());
+            return ResponseEntity.ok().build();
+        } catch (MailSendException e) {
+            String message = extractSmtpMessage(e);
+            return ResponseEntity.badRequest().body("{\"message\":\"" + message + "\"}");
+        }
     }
 
     @GetMapping("/inbox")

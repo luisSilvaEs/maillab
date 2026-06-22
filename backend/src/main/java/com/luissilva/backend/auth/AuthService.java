@@ -108,7 +108,7 @@ public class AuthService {
             throw new BadCredentialsException("Invalid 2FA code");
         }
 
-        String token = jwtService.generateToken(request.username());
+        String token = jwtService.generateToken(request.username(), user.getPassword());
         return AuthResponse.withToken(token);
     }
 
@@ -168,6 +168,7 @@ public class AuthService {
         User user = new User();
         user.setUsername(request.username());
         user.setEmail(request.email());
+        user.setPassword(request.password());
         userRepository.save(user);
     }
 }
